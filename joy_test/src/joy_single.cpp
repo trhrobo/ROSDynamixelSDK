@@ -50,13 +50,14 @@ namespace DXL{
         dxl_comm_result = packet -> write1ByteTxRx(port, DXL_ID, addr, value, &dxl_error);
         if(dxl_comm_result != COMM_SUCCESS){
             string error = packet -> getTxRxResult(dxl_comm_result);
-            cout << error << endl;
+            cout << "error" << endl;
             return false;
         }else if(dxl_error != 0){
             string error = packet -> getRxPacketError(dxl_error);
-            cout << error << endl;
+            cout << "error" << endl;
             return false;
         }
+        return true;
     }
     bool write4Byte(dynamixel::PortHandler *port, dynamixel::PacketHandler *packet, int addr, int value){
         uint8_t dxl_error{};
@@ -71,6 +72,7 @@ namespace DXL{
             cout << error << endl;
             return false;
         }
+        return true;
     }
     int32_t read4Byte(dynamixel::PortHandler *port, dynamixel::PacketHandler *packet, int addr){
         uint8_t dxl_error{};
@@ -133,8 +135,8 @@ int main(int argc, char **argv){
     //----------finish packet setting----------//
 
     while(ros::ok()){
-        if(-0.5 < joy_value && joy_value < 0.5){
-            if(joy_value > 0.5){
+        if(joy_value < -0.5 or 0.5 < joy_value){
+            if(0.5 < joy_value){
                 //Write goal position
                 if(DXL::write4Byte(portHandler, packetHandler, ADDR_GOAL_POSITION, MAX_POSITION_VALUE) == false){
                     return 0;
@@ -152,5 +154,7 @@ int main(int argc, char **argv){
                 return 0;
             }
         }
+        ros::spinOnce();
+        loop_rate.sleep();
     }
 }
